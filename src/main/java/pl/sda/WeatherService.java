@@ -4,6 +4,7 @@ import org.apache.commons.io.IOUtils;
 import pl.sda.model.Condition;
 import pl.sda.model.Current;
 import org.json.*;
+import pl.sda.model.Location;
 
 import java.io.IOException;
 import java.net.MalformedURLException;
@@ -12,6 +13,7 @@ import java.nio.charset.Charset;
 
 public class WeatherService {
     private String finalURL, url, apiKey;
+    private JSONObject jsonData;
 
     public WeatherService(String adress, String key){
         this.url = adress;
@@ -19,36 +21,40 @@ public class WeatherService {
         this.finalURL = this.url +"?key="+this.apiKey+"&q=";
     }
 
-    public Current getCityWeather(String city){
-        String cityURL = finalURL+city;
-        try {
-            String data = IOUtils.toString(new URL(cityURL), Charset.forName("UTF-8"));
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        URL url = null;
-        try {
-            url = new URL(cityURL);
-        } catch (MalformedURLException e){
-            e.printStackTrace();
-        }
-        JSONTokener tokener = null;
-        try {
-            tokener = new JSONTokener(url.openStream());
-        } catch (IOException e){
-            e.printStackTrace();
-        }
+    public Current getCityWeather(){
 
-        JSONObject o = new JSONObject(tokener);
-        JSONObject o2 = o.getJSONObject("current");
-        JSONObject o3 = o2.getJSONObject("condition");
+        JSONObject currentData = this.jsonData.getJSONObject("current");
+        JSONObject conditionData = currentData.getJSONObject("condition");
 
         Current current = Current.builder()
-                            .last_updated_epoch(o2.getLong("last_updated_epoch"))
-                            .last_updated(o2.getString("last_updated"))
-                            .temp_c(o2.getFloat("temp_c"))
-                            .temp_f(o2.getFloat("temp_f"))
-                            .build();
+                .last_updated_epoch(currentData.getLong("last_updated_epoch"))
+                .last_updated(currentData.getString("last_updated"))
+                .temp_c(currentData.getFloat("temp_c"))
+                .temp_f(currentData.getFloat("temp_f"))
+                .is_day(currentData.getInt("is_day"))
+                .condition(Condition.builder()
+                    .text(conditionData.getString("text"))
+                    .icon(conditionData.getString("icon"))
+                    .code(conditionData.getInt("code"))
+                    .build())
+                .wind_mph(currentData.getFloat("wind_mph"))
+                .wind_kph(currentData.getFloat("wind_kph"))
+                .wind_degree(currentData.getInt("wind_degree"))
+                .wind_dir(currentData.getString("wind_dir"))
+                .pressure_mb(currentData.getFloat("pressure_mb"))
+                .pressure_in(currentData.getFloat("pressure_in"))
+                .precip_mm(currentData.getFloat("precip_mm"))
+                .precip_in(currentData.getFloat("precip_in"))
+                .humidity(currentData.getInt("humidity"))
+                .cloud(currentData.getInt("cloud"))
+                .feelslike_c(currentData.getFloat("feelslike_c"))
+                .feelslike_f(currentData.getFloat("feelslike_f"))
+                .vis_km(currentData.getFloat("vis_km"))
+                .vis_miles(currentData.getFloat("vis_miles"))
+                .uv(currentData.getFloat("uv"))
+                .gust_mph(currentData.getFloat("gust_mph"))
+                .gust_kph(currentData.getFloat("gust_kph"))
+                .build();
 
         return current;
 //        return new  Current(o2.getLong("last_updated_epoch"),
@@ -76,5 +82,41 @@ public class WeatherService {
 //                            o2.getFloat("uv"),
 //                            o2.getFloat("gust_mph"),
 //                            o2.getFloat("gust_kph"));
+    }
+
+    public Location getLocation(){
+        JSONObject locationData = jsonData.getJSONObject("location");
+
+        Location location = Location.builder()
+                .name(locationData.getString("name"))
+                .region(locationData.getString("region"))
+                .country(locationData.getString("country"))
+                .lat(locationData.getFloat("lat"))
+                .lon(locationData.getFloat("lon"))
+                .tz_id(locationData.getString("tz_id"))
+                .localtime_epoch(locationData.getLong("localtime_epoch"))
+                .localtime(locationData.getString("localtime"))
+                .build();
+
+        return location;
+    }
+
+    public WeatherService getWeatherData(String city){
+        String cityURL = finalURL+city;
+        URL url = null;
+        try {
+            url = new URL(cityURL);
+        } catch (MalformedURLException e){
+            e.printStackTrace();
+        }
+        JSONTokener tokener = null;
+        try {
+            tokener = new JSONTokener(url.openStream());
+        } catch (IOException e){
+            e.printStackTrace();
+        }
+
+        this.jsonData = new JSONObject(tokener);
+        return this;
     }
 }
