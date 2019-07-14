@@ -12,7 +12,7 @@ import java.net.URL;
 import java.nio.charset.Charset;
 
 public class WeatherService {
-    private String finalURL, url, apiKey;
+    private String finalURL, url, apiKey, city = "";
     private JSONObject jsonData;
 
     public WeatherService(String adress, String key){
@@ -102,21 +102,25 @@ public class WeatherService {
     }
 
     public WeatherService getWeatherData(String city){
-        String cityURL = finalURL+city;
-        URL url = null;
-        try {
-            url = new URL(cityURL);
-        } catch (MalformedURLException e){
-            e.printStackTrace();
-        }
-        JSONTokener tokener = null;
-        try {
-            tokener = new JSONTokener(url.openStream());
-        } catch (IOException e){
-            e.printStackTrace();
-        }
+        if (!this.city.equals(city)){
+            this.city = city;
+            String cityURL = finalURL+city;
 
-        this.jsonData = new JSONObject(tokener);
+            URL url = null;
+            try {
+                url = new URL(cityURL);
+            } catch (MalformedURLException e){
+                e.printStackTrace();
+            }
+            JSONTokener tokener = null;
+            try {
+                tokener = new JSONTokener(url.openStream());
+            } catch (IOException e){
+                e.printStackTrace();
+            }
+
+            this.jsonData = new JSONObject(tokener);
+        }
         return this;
     }
 }
