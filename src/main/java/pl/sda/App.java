@@ -1,17 +1,22 @@
 package pl.sda;
 import pl.sda.model.*;
+import org.apache.log4j.*;
 
 /**
  * Hello world!
  *
  */
-public class App 
+public class App
 {
+    private static Logger logger = Logger.getLogger(App.class);
+
     public static void main( String[] args ){
+        logger.info("URUCHOMIENIE APLIKACJI");
+        logger.warn("WARNING");
+        logger.debug("DEBUG");
+        logger.error("ERROR");
         WeatherService weatherService = new WeatherService("http://api.apixu.com/v1/current.json", "c43efeb2af124a358ca81413191307");
-        Current current = weatherService.getWeatherData("Torun").getCityWeather();
-        Location location = weatherService.getWeatherData("Torun").getLocation();
-        System.out.println(location.getLocaltime());
-        System.out.println(current.getHumidity());
+        Weather weather = weatherService.getWeather("Torun");
+        System.out.println(weather);
     }
 }

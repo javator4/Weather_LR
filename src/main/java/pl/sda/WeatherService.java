@@ -1,16 +1,18 @@
 package pl.sda;
 
-import org.apache.commons.io.IOUtils;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import lombok.Data;
 import pl.sda.model.Condition;
 import pl.sda.model.Current;
 import org.json.*;
 import pl.sda.model.Location;
+import pl.sda.model.Weather;
 
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
-import java.nio.charset.Charset;
 
+@Data
 public class WeatherService {
     private String finalURL, url, apiKey, city = "";
     private JSONObject jsonData;
@@ -21,6 +23,7 @@ public class WeatherService {
         this.finalURL = this.url +"?key="+this.apiKey+"&q=";
     }
 
+    @Deprecated
     public Current getCityWeather(){
 
         JSONObject currentData = this.jsonData.getJSONObject("current");
@@ -84,6 +87,7 @@ public class WeatherService {
 //                            o2.getFloat("gust_kph"));
     }
 
+    @Deprecated
     public Location getLocation(){
         JSONObject locationData = jsonData.getJSONObject("location");
 
@@ -101,6 +105,7 @@ public class WeatherService {
         return location;
     }
 
+    @Deprecated
     public WeatherService getWeatherData(String city){
         if (!this.city.equals(city)){
             this.city = city;
@@ -122,5 +127,21 @@ public class WeatherService {
             this.jsonData = new JSONObject(tokener);
         }
         return this;
+    }
+
+    public Weather getWeather(String city){
+        if (!this.city.equals(city)) {
+            this.city = city;
+            String cityURL = finalURL + city;
+
+            ObjectMapper objectMapper = new ObjectMapper();
+            try {
+                Weather weather = objectMapper.readValue(new URL(cityURL), Weather.class);
+                return weather;
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+        return null;
     }
 }

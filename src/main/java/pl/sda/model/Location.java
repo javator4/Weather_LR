@@ -10,6 +10,20 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @Builder
 public class Location {
+    @Override
+    public String toString() {
+        return "Location{" +
+                "name='" + name + '\'' +
+                ", region='" + region + '\'' +
+                ", country='" + country + '\'' +
+                ", lat=" + lat +
+                ", lon=" + lon +
+                ", tz_id='" + tz_id + '\'' +
+                ", localtime_epoch=" + localtime_epoch +
+                ", localtime='" + localtime + '\'' +
+                '}';
+    }
+
     private String  name,
                     region,
                     country;
